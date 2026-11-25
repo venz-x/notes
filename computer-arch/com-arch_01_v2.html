@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Computer Architecture Lecture Notes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false})"></script>
+<style>
+:root{
+  --paper:#FFFFFF; --ink:#111827; --rule:#E5E7EB;
+  --navy:#1E3A8A; --teal:#0D9488; --mute:#4B5563;
+  --navy-t:#E6EAF5; --teal-t:#DCF2EF; --grey-t:#F3F4F6;
+  --sans:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono","Fira Code",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.65;-webkit-text-size-adjust:100%}
+.wrap{max-width:860px;margin:0 auto;padding-block:48px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4,.eyebrow,figcaption,th,.box-t{font-family:var(--sans)}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);font-weight:600;margin:0}
+.top{border-bottom:3px solid var(--navy);padding-bottom:28px}
+h1{font-size:clamp(30px,5.4vw,46px);line-height:1.08;margin:10px 0 16px;letter-spacing:-.02em;font-weight:700;text-wrap:balance}
+.lede{max-width:62ch;color:var(--mute);margin:0}
+.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0 36px;margin:26px 0 0;padding:0;list-style:none;max-width:none}
+.toc li{margin:0}
+.toc a{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--rule);color:var(--ink);text-decoration:none;font-family:var(--sans);font-size:15px;font-weight:500;line-height:1.35}
+.toc a b{color:var(--navy);min-width:66px;font-weight:600}
+.toc a:hover{color:var(--navy)}
+a:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.mod{margin-top:68px;padding-top:30px;border-top:1px solid var(--rule)}
+.mod.first{margin-top:34px;border-top:0;padding-top:0}
+.mh{margin-bottom:22px}
+h2{font-size:clamp(24px,3.8vw,32px);line-height:1.18;margin:6px 0 0;font-weight:700;letter-spacing:-.015em;text-wrap:balance}
+h3{font-size:19px;line-height:1.3;color:var(--navy);margin:36px 0 10px;font-weight:600;text-wrap:balance}
+p{margin:0 0 14px;max-width:70ch}
+ul,ol{max-width:70ch;margin:0 0 16px;padding-left:1.4em}
+li{margin:5px 0}
+sub,sup{line-height:0}
+code{font-family:var(--mono);font-size:.84em;background:var(--grey-t);padding:1px 5px;border-radius:3px;white-space:nowrap}
+.scroll{overflow-x:auto;max-width:100%}
+table.t{border-collapse:collapse;width:100%;min-width:520px;font-family:var(--sans);font-size:14px;margin:6px 0 18px}
+table.t th{text-align:left;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);font-weight:600;border-bottom:2px solid var(--ink);padding:8px 14px 8px 0;vertical-align:bottom}
+table.t td{border-bottom:1px solid var(--rule);padding:9px 14px 9px 0;vertical-align:top;line-height:1.45}
+.box{border:1px solid var(--rule);border-top:2px solid var(--navy);padding:16px 20px 14px;margin:26px 0;max-width:70ch}
+.box.note{background:var(--navy-t);border-color:transparent}
+.box-t{font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--navy);margin:0 0 8px}
+.box p:last-child,.box ol,.box ul{margin-bottom:0}
+.fig{margin:28px 0}
+.fig .scroll{border:1px solid var(--rule);padding:12px 10px 8px}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{font-size:13.5px;line-height:1.5;color:var(--mute);margin-top:10px;max-width:72ch}
+.fig figcaption b{color:var(--ink)}
+svg .t{font-family:var(--sans)}
+svg .m{font-family:var(--mono)}
+/* math */
+.katex{font-size:1.06em}
+.katex-display{margin:.7em 0;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+.math{max-width:100%}
+/* problems */
+.prob{border:1px solid var(--rule);border-left:4px solid var(--navy);padding:16px 20px 8px;margin:28px 0}
+.prob.extra{border-left-color:var(--teal);background:#FAFEFD}
+.prob>header{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.pn{font-family:var(--sans);font-weight:700;color:var(--navy);font-size:16px}
+.prob.extra .pn{color:var(--teal)}
+.tag{font-family:var(--sans);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.badge{font-family:var(--sans);background:var(--teal);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:3px}
+.prob h4{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:14px 0 2px;font-weight:700}
+.concl{background:var(--teal-t);border-left:4px solid var(--teal);padding:10px 16px;margin:12px 0 14px;font-family:var(--sans);font-size:15px;font-weight:600;max-width:70ch}
+.formula{border:1px solid var(--rule);border-top:2px solid var(--teal);padding:8px 20px;margin:18px 0;max-width:70ch}
+.formula .box-t{color:var(--teal);margin-top:6px}
+@page{size:A4;margin:16mm}
+@media print{
+  body{font-size:11pt}
+  .wrap{max-width:none;padding:0}
+  .mod{break-before:page;margin-top:0;border-top:0;padding-top:0}
+  .mod.first{break-before:auto}
+  .fig,.box,table.t,.prob{break-inside:avoid}
+  .scroll{overflow:visible}
+  .fig svg{min-width:0 !important}
+  a{color:inherit}
+}
+</style>
+</head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<marker id="ah-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0D9488"/></marker>
+<marker id="ah-navy" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1E3A8A"/></marker>
+<marker id="ah-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#111827"/></marker>
+<marker id="ah-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1E3A8A"/></marker>
+</defs></svg>
+<div class="wrap">
+<header class="top"><p class="eyebrow">Computer architecture &middot; Lecture handout &middot; By <span class="badge">Nazmul Hasan</span> (67)</p><h1>Computer Architecture Lecture Notes</h1>
+<p class="lede">The block diagram of a computer, registers, the system bus, Von Neumann versus Harvard, the seven great ideas, and the performance toolkit: throughput, CPU time, speedup and Amdahl&rsquo;s law. Every class problem is solved step by step, and practice problems added by me are tagged <span class="badge">Extra Example</span>.</p>
+<ul class="toc" aria-label="Contents">
+<li><a href="#s1"><b>Section 1</b><span>Computer architecture and its block diagram</span></a></li>
+<li><a href="#s2"><b>Section 2</b><span>Registers: PC, IR, MAR, MDR, AC</span></a></li>
+<li><a href="#s3"><b>Section 3</b><span>The system bus</span></a></li>
+<li><a href="#s4"><b>Section 4</b><span>Von Neumann vs. Harvard architecture</span></a></li>
+<li><a href="#s5"><b>Section 5</b><span>Seven great ideas in computer architecture</span></a></li>
+<li><a href="#s6"><b>Section 6</b><span>Understanding performance (Problems 1&ndash;2)</span></a></li>
+<li><a href="#s7"><b>Section 7</b><span>CPU time and clock rate (Problems 3&ndash;4)</span></a></li>
+<li><a href="#s8"><b>Section 8</b><span>Speedup and performance scaling (Problems 5&ndash;7)</span></a></li>
+<li><a href="#s9"><b>Section 9</b><span>Pitfall: Amdahl&rsquo;s law (Problems 8&ndash;10)</span></a></li>
+</ul></header>
+
+<!-- ================= SECTION 1 ================= -->
+<section class="mod first" id="s1">
+<header class="mh"><p class="eyebrow">Section 1</p><h2>Computer architecture and its block diagram</h2></header>
+<div class="box note"><p class="box-t">Scope</p><p>Define level, not depth. Know what each part is and what it does. Hardware internals are not needed.</p></div>
+<h3>What is computer architecture?</h3>
+<p><b>Computer architecture</b> is the conceptual design and fundamental operational structure of a computer system. It describes which hardware components exist, how they are connected, and how together they fetch and execute instructions. It answers &ldquo;what does the machine look like to the programmer and how do the parts cooperate?&rdquo; and leaves &ldquo;how are the transistors wired?&rdquo; to circuit design.</p>
+
+<h3>Block diagram</h3>
+<figure class="fig"><div class="scroll"><svg viewBox="0 0 760 370" style="min-width:680px" role="img" aria-label="Block diagram: Input, Memory, Output on the top row, ALU below Memory, Control unit bar at the bottom with dashed control arrows to Input, Memory, ALU and Output">
+<rect x="30" y="40" width="140" height="56" fill="#E6EAF5" stroke="#1E3A8A" stroke-width="2"/><text x="100" y="68" class="t" font-size="16" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">Input</text>
+<rect x="270" y="40" width="220" height="56" fill="#E6EAF5" stroke="#1E3A8A" stroke-width="2"/><text x="380" y="68" class="t" font-size="16" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">Memory</text>
+<rect x="590" y="40" width="140" height="56" fill="#E6EAF5" stroke="#1E3A8A" stroke-width="2"/><text x="660" y="68" class="t" font-size="16" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">Output</text>
+<rect x="320" y="190" width="120" height="56" fill="#DCF2EF" stroke="#0D9488" stroke-width="2"/><text x="380" y="210" class="t" font-size="16" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">ALU</text><text x="380" y="230" class="t" font-size="11" text-anchor="middle" dominant-baseline="central" fill="#4B5563">Arithmetic Logic Unit</text>
+<rect x="30" y="300" width="700" height="46" fill="#DCF2EF" stroke="#0D9488" stroke-width="2"/><text x="380" y="323" class="t" font-size="16" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">Control (Control Unit)</text>
+<line x1="170" y1="68" x2="268" y2="68" stroke="#1E3A8A" stroke-width="2.4" marker-end="url(#ah-navy)"/>
+<line x1="490" y1="68" x2="588" y2="68" stroke="#1E3A8A" stroke-width="2.4" marker-end="url(#ah-navy)"/>
+<line x1="380" y1="98" x2="380" y2="188" stroke="#1E3A8A" stroke-width="2.4" marker-start="url(#ah-b)" marker-end="url(#ah-b)"/>
+<line x1="100" y1="300" x2="100" y2="98" stroke="#0D9488" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#ah-teal)"/>
+<line x1="290" y1="300" x2="290" y2="98" stroke="#0D9488" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#ah-teal)"/>
+<line x1="380" y1="300" x2="380" y2="248" stroke="#0D9488" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#ah-teal)"/>
+<line x1="420" y1="248" x2="420" y2="298" stroke="#1E3A8A" stroke-width="2.4" marker-end="url(#ah-navy)"/><text x="430" y="274" class="t" font-size="12" font-weight="600" dominant-baseline="central" fill="#111827">status flags</text>
+<line x1="660" y1="300" x2="660" y2="98" stroke="#0D9488" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#ah-teal)"/>
+<line x1="470" y1="170" x2="520" y2="170" stroke="#1E3A8A" stroke-width="2.4"/><text x="528" y="170" class="t" font-size="12" dominant-baseline="central" fill="#111827">data flow</text>
+<line x1="470" y1="196" x2="520" y2="196" stroke="#0D9488" stroke-width="2.2" stroke-dasharray="6 4"/><text x="528" y="196" class="t" font-size="12" dominant-baseline="central" fill="#111827">control signals</text>
+</svg></div><figcaption><b>Figure 1.1.</b> Block diagram of a computer. Solid arrows carry data (Input &rarr; Memory &rarr; Output, both ways between Memory and ALU, and ALU &rarr; Control for status flags). Dashed arrows are control signals sent by the Control unit to all four other blocks.</figcaption></figure>
+
+<h3>Role of each block</h3>
+<div class="scroll"><table class="t"><thead><tr><th>Block</th><th>Role</th></tr></thead><tbody>
+<tr><td><b>Input</b></td><td>Brings programs and data into the computer from the outside world (keyboard, mouse, disk, sensors).</td></tr>
+<tr><td><b>Memory</b></td><td>Stores the program instructions and the data they work on, in numbered cells (addresses).</td></tr>
+<tr><td><b>ALU</b> (Arithmetic Logic Unit)</td><td>Performs the actual computing: arithmetic (add, subtract) and logic (AND, OR, compare). It also reports <b>status flags</b> (zero, carry, overflow, negative) back to Control.</td></tr>
+<tr><td><b>Control</b> (Control Unit)</td><td>The conductor. It fetches and decodes each instruction and sends control signals telling every other block what to do and when.</td></tr>
+<tr><td><b>Output</b></td><td>Delivers results to the outside world (screen, printer, speaker, disk).</td></tr>
+</tbody></table></div>
+<p>Together, the Control unit and the ALU (plus registers) form the <b>CPU</b>, the processor.</p>
+
+<h3>The ALU &rarr; Control arrow: status flags</h3>
+<p>Control tells the ALU <i>what</i> to do, but sometimes Control must know <i>what happened</i> before it can choose the next step. After each operation the ALU sends back small yes/no signals called <b>status flags</b>:</p>
+<div class="scroll"><table class="t" style="min-width:480px"><thead><tr><th>Flag</th><th>Set to 1 when</th></tr></thead><tbody>
+<tr><td><b>Zero</b></td><td>the result is 0</td></tr>
+<tr><td><b>Negative</b></td><td>the result is negative</td></tr>
+<tr><td><b>Carry</b></td><td>an addition produced a carry out of the top bit</td></tr>
+<tr><td><b>Overflow</b></td><td>the result is too large to fit in the register</td></tr>
+</tbody></table></div>
+
+<h3>How the blocks work together: example operations</h3>
+<p>Every instruction goes through the same <b>fetch &rarr; decode &rarr; execute</b> cycle, driven by Control. The registers from Section 2 hold the values passing between the blocks.</p>
+
+<p><b>Example A: <code>ADD X</code> (add the number stored at address X to AC).</b> Suppose AC = 5 and Memory[X] = 3.</p>
+<div class="scroll"><table class="t"><thead><tr><th>Step</th><th>What happens</th><th>Blocks and registers involved</th></tr></thead><tbody>
+<tr><td>1. Fetch</td><td>The address in PC is copied to MAR. Control sends a <i>read</i> signal. The instruction <code>ADD X</code> comes back through MDR into IR. PC moves on to the next instruction.</td><td>Control &rarr; Memory (dashed); Memory &rarr; MDR &rarr; IR (data); PC, MAR</td></tr>
+<tr><td>2. Decode</td><td>Control reads the opcode in IR and works out: &ldquo;add, with the operand at address X.&rdquo;</td><td>Control, IR</td></tr>
+<tr><td>3. Get operand</td><td>X is placed in MAR. Control sends another <i>read</i> signal. The value \(3\) arrives in MDR.</td><td>Control &rarr; Memory; Memory &rarr; MDR</td></tr>
+<tr><td>4. Execute</td><td>Control tells the ALU to <i>add</i>. The ALU takes AC \((5)\) and MDR \((3)\) and stores \(5+3=8\) back in AC.</td><td>Control &rarr; ALU (dashed); MDR, AC &harr; ALU (data)</td></tr>
+<tr><td>5. Report</td><td>The ALU sends its flags to Control: Zero = 0, Negative = 0, Carry = 0, Overflow = 0.</td><td><b>ALU &rarr; Control</b> (status flags)</td></tr>
+</tbody></table></div>
+
+<p><b>Example B: a conditional jump, &ldquo;if AC equals 5, jump to address T&rdquo;.</b> This is where the ALU &rarr; Control arrow matters.</p>
+<div class="scroll"><table class="t"><thead><tr><th>Step</th><th>What happens</th></tr></thead><tbody>
+<tr><td>1</td><td>Fetch and decode the compare/jump instruction, as in Example A.</td></tr>
+<tr><td>2</td><td>Control tells the ALU to <i>subtract</i> 5 from AC. With AC = 5 the ALU computes \(5-5=0\).</td></tr>
+<tr><td>3</td><td>The ALU sends the <b>Zero flag = 1</b> to Control.</td></tr>
+<tr><td>4</td><td>Control sees Zero = 1, so the condition is true and it loads T into PC. The next fetch starts at T. If Zero had been 0, PC would be left alone and the program would continue in order.</td></tr>
+</tbody></table></div>
+
+<p><b>Example C: input and output.</b> To read a value, Control signals Input to send it, and it is stored in Memory. To show a result, Control signals Memory to send the value to Output. Data moves along the solid arrows and Control triggers each move with the dashed ones.</p>
+</section>
+
+<!-- ================= SECTION 2 ================= -->
+<section class="mod" id="s2">
+<header class="mh"><p class="eyebrow">Section 2</p><h2>Registers</h2></header>
+<div class="box note"><p class="box-t">Scope</p><p>Definition and just know. Nothing else is needed.</p></div>
+<p>A <b>register</b> is a tiny, very fast storage cell inside the CPU. Five special-purpose registers to know:</p>
+<div class="scroll"><table class="t"><thead><tr><th>Register</th><th>Name</th><th>Definition</th></tr></thead><tbody>
+<tr><td><b>PC</b></td><td>Program Counter</td><td>Holds the memory address of the <b>next instruction</b> to be fetched and executed.</td></tr>
+<tr><td><b>IR</b></td><td>Instruction Register</td><td>Holds the <b>current instruction</b> being decoded and executed.</td></tr>
+<tr><td><b>MAR</b></td><td>Memory Address Register</td><td>Holds the <b>memory address</b> from which data will be fetched or to which data will be written.</td></tr>
+<tr><td><b>MDR</b></td><td>Memory Data Register</td><td>Holds the <b>actual data</b> being transferred to or from memory.</td></tr>
+<tr><td><b>AC</b></td><td>Accumulator</td><td>Temporarily stores <b>intermediate arithmetic and logic results</b> from the ALU.</td></tr>
+</tbody></table></div>
+<p>Memory trick: <b>MAR</b> = <i>where</i> (address), <b>MDR</b> = <i>what</i> (data).</p>
+</section>
+
+<!-- ================= SECTION 3 ================= -->
+<section class="mod" id="s3">
+<header class="mh"><p class="eyebrow">Section 3</p><h2>The system bus</h2></header>
+<p>A <b>bus</b> is a shared communication pathway, a set of parallel wires, that connects the CPU, memory and I/O devices. The <b>system bus</b> is made of three groups of lines.</p>
+<div class="scroll"><table class="t"><thead><tr><th>Bus</th><th>Carries</th><th>Direction</th></tr></thead><tbody>
+<tr><td><b>Address bus</b></td><td>The memory or I/O address being accessed (the &ldquo;where&rdquo;).</td><td>One way, CPU &rarr; memory / I/O</td></tr>
+<tr><td><b>Data bus</b></td><td>The actual data or instruction being moved (the &ldquo;what&rdquo;).</td><td>Two way</td></tr>
+<tr><td><b>Control bus</b></td><td>Control and timing signals such as read, write and clock.</td><td>Mostly from the CPU, with some status lines back</td></tr>
+</tbody></table></div>
+<figure class="fig"><div class="scroll"><svg viewBox="0 0 840 230" style="min-width:720px" role="img" aria-label="CPU, Memory and I/O devices all attached to three shared bus lines: address, data and control">
+<rect x="60" y="20" width="140" height="44" fill="#E6EAF5" stroke="#1E3A8A" stroke-width="2"/><text x="130" y="42" class="t" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">CPU</text>
+<rect x="330" y="20" width="140" height="44" fill="#E6EAF5" stroke="#1E3A8A" stroke-width="2"/><text x="400" y="42" class="t" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">Memory</text>
+<rect x="600" y="20" width="140" height="44" fill="#E6EAF5" stroke="#1E3A8A" stroke-width="2"/><text x="670" y="42" class="t" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">I/O devices</text>
+<line x1="40" y1="110" x2="740" y2="110" stroke="#1E3A8A" stroke-width="3"/><text x="752" y="110" class="t" font-size="13" font-weight="600" dominant-baseline="central" fill="#111827">Address bus</text>
+<line x1="40" y1="145" x2="740" y2="145" stroke="#0D9488" stroke-width="3"/><text x="752" y="145" class="t" font-size="13" font-weight="600" dominant-baseline="central" fill="#111827">Data bus</text>
+<line x1="40" y1="180" x2="740" y2="180" stroke="#111827" stroke-width="3" stroke-dasharray="8 5"/><text x="752" y="180" class="t" font-size="13" font-weight="600" dominant-baseline="central" fill="#111827">Control bus</text>
+<g stroke="#111827" stroke-width="1.4"><line x1="130" y1="64" x2="130" y2="180"/><line x1="400" y1="64" x2="400" y2="180"/><line x1="670" y1="64" x2="670" y2="180"/></g>
+<g fill="#111827"><circle cx="130" cy="110" r="4"/><circle cx="130" cy="145" r="4"/><circle cx="130" cy="180" r="4"/><circle cx="400" cy="110" r="4"/><circle cx="400" cy="145" r="4"/><circle cx="400" cy="180" r="4"/><circle cx="670" cy="110" r="4"/><circle cx="670" cy="145" r="4"/><circle cx="670" cy="180" r="4"/></g>
+</svg></div><figcaption><b>Figure 3.1.</b> The system bus. Every component taps into the same three groups of wires.</figcaption></figure>
+</section>
+
+<!-- ================= SECTION 4 ================= -->
+<section class="mod" id="s4">
+<header class="mh"><p class="eyebrow">Section 4</p><h2>Von Neumann architecture vs. Harvard architecture</h2></header>
+
+<h3>Von Neumann architecture</h3>
+<p>A <b>single shared memory</b> (and a single bus) holds <b>both program instructions and data</b>. The CPU fetches an instruction, then fetches or stores data, all through the same path.</p>
+<figure class="fig"><div class="scroll"><svg viewBox="0 0 760 310" style="min-width:680px" role="img" aria-label="Von Neumann architecture: Input to a single shared memory split into Instructions and Data, to Output; the CPU with Control and ALU connects to that one memory through one bus">
+<rect x="20" y="55" width="130" height="50" fill="#E6EAF5" stroke="#1E3A8A" stroke-width="2"/><text x="85" y="80" class="t" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">Input</text><text x="85" y="118" class="t" font-size="11" text-anchor="middle" fill="#4B5563">from devices</text>
+<rect x="290" y="20" width="180" height="130" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="2.4"/><text x="380" y="34" class="t" font-size="12" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#1E3A8A">Shared memory</text>
+<rect x="305" y="46" width="150" height="42" fill="#E6EAF5" stroke="#1E3A8A" stroke-width="1.4"/><text x="380" y="67" class="t" font-size="14" font-weight="600" text-anchor="middle" dominant-baseline="central" fill="#111827">Instructions</text>
+<rect x="305" y="96" width="150" height="42" fill="#DCF2EF" stroke="#0D9488" stroke-width="1.4"/><text x="380" y="117" class="t" font-size="14" font-weight="600" text-anchor="middle" dominant-baseline="central" fill="#111827">Data</text>
+<rect x="610" y="55" width="130" height="50" fill="#E6EAF5" stroke="#1E3A8A" stroke-width="2"/><text x="675" y="80" class="t" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">Output</text>
+<rect x="290" y="215" width="180" height="80" fill="#FFFFFF" stroke="#111827" stroke-width="2"/><text x="380" y="229" class="t" font-size="12" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">CPU</text>
+<rect x="302" y="242" width="76" height="44" fill="#DCF2EF" stroke="#0D9488" stroke-width="1.6"/><text x="340" y="264" class="t" font-size="13" font-weight="600" text-anchor="middle" dominant-baseline="central" fill="#111827">Control</text>
+<rect x="382" y="242" width="76" height="44" fill="#DCF2EF" stroke="#0D9488" stroke-width="1.6"/><text x="420" y="264" class="t" font-size="13" font-weight="600" text-anchor="middle" dominant-baseline="central" fill="#111827">ALU</text>
+<line x1="150" y1="80" x2="288" y2="80" stroke="#1E3A8A" stroke-width="2.4" marker-end="url(#ah-navy)"/>
+<line x1="470" y1="80" x2="608" y2="80" stroke="#1E3A8A" stroke-width="2.4" marker-end="url(#ah-navy)"/>
+<line x1="380" y1="152" x2="380" y2="213" stroke="#1E3A8A" stroke-width="2.4" marker-start="url(#ah-b)" marker-end="url(#ah-b)"/>
+<text x="394" y="183" class="t" font-size="12" font-weight="600" dominant-baseline="central" fill="#111827">one shared bus: instructions and data</text>
+</svg></div><figcaption><b>Figure 4.1.</b> Von Neumann: one memory partitioned into Instructions and Data, reached by the CPU over a single bus.</figcaption></figure>
+
+<h3>Harvard architecture</h3>
+<p>Instruction memory and data memory are <b>separate</b>, each with its own bus to the CPU. The CPU can therefore fetch the next instruction while it reads or writes data.</p>
+<figure class="fig"><div class="scroll"><svg viewBox="0 0 760 250" style="min-width:680px" role="img" aria-label="Harvard architecture: separate Instruction Memory and Data Memory each connected to the CPU with Control and ALU, plus Input and Output">
+<rect x="30" y="50" width="180" height="56" fill="#E6EAF5" stroke="#1E3A8A" stroke-width="2"/><text x="120" y="78" class="t" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">Instruction Memory</text>
+<rect x="30" y="150" width="180" height="56" fill="#DCF2EF" stroke="#0D9488" stroke-width="2"/><text x="120" y="178" class="t" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">Data Memory</text>
+<rect x="320" y="30" width="190" height="190" fill="#FFFFFF" stroke="#111827" stroke-width="2"/><text x="415" y="46" class="t" font-size="12" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">CPU</text>
+<rect x="335" y="62" width="160" height="56" fill="#DCF2EF" stroke="#0D9488" stroke-width="1.6"/><text x="415" y="90" class="t" font-size="14" font-weight="600" text-anchor="middle" dominant-baseline="central" fill="#111827">Control</text>
+<rect x="335" y="130" width="160" height="56" fill="#DCF2EF" stroke="#0D9488" stroke-width="1.6"/><text x="415" y="158" class="t" font-size="14" font-weight="600" text-anchor="middle" dominant-baseline="central" fill="#111827">ALU</text>
+<rect x="600" y="50" width="130" height="50" fill="#E6EAF5" stroke="#1E3A8A" stroke-width="2"/><text x="665" y="75" class="t" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">Input</text>
+<rect x="600" y="150" width="130" height="50" fill="#E6EAF5" stroke="#1E3A8A" stroke-width="2"/><text x="665" y="175" class="t" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#111827">Output</text>
+<line x1="210" y1="78" x2="318" y2="78" stroke="#1E3A8A" stroke-width="2.4" marker-end="url(#ah-navy)"/><text x="264" y="66" class="t" font-size="11" font-weight="600" text-anchor="middle" fill="#111827">instruction bus</text>
+<line x1="210" y1="178" x2="318" y2="178" stroke="#1E3A8A" stroke-width="2.4" marker-start="url(#ah-b)" marker-end="url(#ah-b)"/><text x="264" y="166" class="t" font-size="11" font-weight="600" text-anchor="middle" fill="#111827">data bus</text>
+<line x1="598" y1="75" x2="512" y2="75" stroke="#1E3A8A" stroke-width="2.4" marker-end="url(#ah-navy)"/>
+<line x1="512" y1="175" x2="598" y2="175" stroke="#1E3A8A" stroke-width="2.4" marker-end="url(#ah-navy)"/>
+</svg></div><figcaption><b>Figure 4.2.</b> Harvard: instruction memory and data memory are separate blocks, each wired to the CPU on its own bus.</figcaption></figure>
+
+<h3>Advantages and disadvantages</h3>
+<div class="scroll"><table class="t"><thead><tr><th></th><th>Von Neumann</th><th>Harvard</th></tr></thead><tbody>
+<tr><td><b>Memory / bus structure</b></td><td>One memory space and one bus for instructions and data.</td><td>Two separate memories and two buses.</td></tr>
+<tr><td><b>Speed</b></td><td>Instruction fetch and data access compete for the same bus. This is the <b>Von Neumann bottleneck</b>.</td><td>Instruction and data can be accessed <b>simultaneously</b>, so it is faster per cycle.</td></tr>
+<tr><td><b>Hardware complexity and cost</b></td><td>Simpler and cheaper (one memory, one bus).</td><td>More complex and costly (two memories, two buses, more pins).</td></tr>
+<tr><td><b>Flexibility</b></td><td>Memory is shared flexibly between code and data; programs can be loaded and even modified like data.</td><td>Fixed split. Spare data memory cannot be used for code and vice versa.</td></tr>
+<tr><td><b>Typical use</b></td><td>General-purpose computers (PCs, laptops, servers).</td><td>Microcontrollers and DSPs (signal-processing chips).</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ================= SECTION 5 ================= -->
+<section class="mod" id="s5">
+<header class="mh"><p class="eyebrow">Section 5</p><h2>Seven great ideas in computer architecture</h2></header>
+<p>The lecture introduction lists seven big ideas that shape almost every modern computer design.</p>
+<div class="scroll"><table class="t"><thead><tr><th>#</th><th>Idea</th><th>Meaning</th><th>Example</th></tr></thead><tbody>
+<tr><td>1</td><td><b>Abstraction</b></td><td>Hide lower-level hardware details behind simpler high-level interfaces to manage complexity.</td><td>A program uses an instruction set without knowing the transistors.</td></tr>
+<tr><td>2</td><td><b>Make the common case fast</b></td><td>Optimizing frequent operations gives far greater overall speedup than optimizing rare ones.</td><td>Fast integer add, since adds are very common (this is Amdahl&rsquo;s law, Section 9).</td></tr>
+<tr><td>3</td><td><b>Parallelism</b></td><td>Perform multiple operations at the same time to boost performance.</td><td>Multi-core processors, instruction-level parallelism.</td></tr>
+<tr><td>4</td><td><b>Pipelining</b></td><td>Overlap the execution stages of several instructions, like an assembly line, to raise instruction throughput.</td><td>While one instruction executes, the next is decoded and a third is fetched.</td></tr>
+<tr><td>5</td><td><b>Prediction</b></td><td>Guess an outcome ahead of time rather than wait for it, to avoid pipeline stalls.</td><td>Branch prediction.</td></tr>
+<tr><td>6</td><td><b>Hierarchy of memories</b></td><td>Organize memory in layers so the fastest, smallest memory is closest to the CPU and larger, cheaper memory holds bulk data.</td><td>Registers &rarr; Cache &rarr; RAM &rarr; Storage.</td></tr>
+<tr><td>7</td><td><b>Dependability via redundancy</b></td><td>Include backup components so the system keeps working reliably if one fails.</td><td>RAID disks, ECC memory.</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ================= SECTION 6 ================= -->
+<section class="mod" id="s6">
+<header class="mh"><p class="eyebrow">Section 6</p><h2>Understanding performance</h2></header>
+<h3>Two core metrics</h3>
+<div class="scroll"><table class="t"><thead><tr><th>Metric</th><th>Meaning</th><th>Question it answers</th></tr></thead><tbody>
+<tr><td><b>Response time</b> (execution time)</td><td>Total time to complete one task.</td><td>&ldquo;How long do I wait?&rdquo;</td></tr>
+<tr><td><b>Throughput</b> (bandwidth)</td><td>Total work (tasks or instructions) completed per unit of time.</td><td>&ldquo;How much gets done per second?&rdquo;</td></tr>
+</tbody></table></div>
+<p>Response time splits into two parts:</p>
+<div class="math">$$\text{Response Time}=\text{CPU Time}+\text{I/O Time}$$</div>
+<ul><li><b>I/O time</b>: disk, memory, network and operating-system overhead.</li><li><b>CPU time</b>: the time the processor actually spends computing the task.</li></ul>
+
+<div class="formula"><p class="box-t">Core formulas</p>
+<div class="math">$$\text{Performance}=\frac{1}{\text{Execution Time}}\qquad\qquad \text{Throughput}=\frac{N}{T}$$</div>
+<p>where \(N\) is the number of tasks (or instructions) and \(T\) is the total (CPU) time. Higher performance and higher throughput are both better, and a smaller time means a higher performance.</p></div>
+<p>To say &ldquo;A is \(n\) times faster than B&rdquo;: \(\dfrac{\text{Performance}_A}{\text{Performance}_B}=\dfrac{\text{Time}_B}{\text{Time}_A}=n\).</p>
+
+<article class="prob" id="p1"><header><span class="pn">Problem 1</span><span class="tag">From class notes &middot; completed</span></header>
+<p>Processor A executes \(600\) million instructions in \(0.3\) sec. Processor B executes \(5\) billion instructions in \(2.5\) sec. Find the throughput of each and compare them.</p>
+<h4>Solution</h4>
+<div class="math">$$\text{Throughput}=\frac{N}{T}$$</div>
+<div class="math">$$\text{Throughput}_A=\frac{600\times10^{6}}{0.3\ \text{sec}}=\frac{6\times10^{8}}{3\times10^{-1}}=2\times10^{9}\ \text{instructions/sec}$$</div>
+<div class="math">$$\text{Throughput}_B=\frac{5\times10^{9}}{2.5\ \text{sec}}=2\times10^{9}\ \text{instructions/sec}$$</div>
+<div class="concl">Conclusion: \(\text{Throughput}_A=\text{Throughput}_B=\boxed{2\times10^{9}\ \text{instructions/sec}}\). Both processors have equal throughput.</div>
+<div class="box note"><p class="box-t">Correction to the handwritten note</p><p>The note for A showed \(2\times10^{7}\). The correct value is \(2\times10^{9}\): \(600\times10^{6}=6\times10^{8}\), and dividing by \(0.3\) multiplies by about \(3.33\), giving \(2\times10^{9}\). B&rsquo;s line was left blank and is completed above.</p></div>
+</article>
+
+<article class="prob" id="p2"><header><span class="pn">Problem 2</span><span class="tag">From class notes &middot; completed</span></header>
+<p>Processor A executes a task in \(10\) sec and Processor B executes it in \(15\) sec. Find the performance of each and decide which is better.</p>
+<h4>Solution</h4>
+<div class="math">$$\text{Performance}=\frac{1}{\text{Execution Time}}$$</div>
+<div class="math">$$\text{Performance}_A=\frac{1}{10}=0.1\ \text{sec}^{-1}\qquad\text{Performance}_B=\frac{1}{15}\approx0.067\ \text{sec}^{-1}$$</div>
+<div class="concl">Conclusion: \(0.1\gt0.067\), so <b>Processor A has better performance</b>. Check: \(\dfrac{0.1}{0.067}=\dfrac{15}{10}=1.5\), so A is \(1.5\times\) faster than B.</div>
+</article>
+
+<article class="prob extra" id="e1"><header><span class="badge">Extra Example</span><span class="pn">Throughput</span></header>
+<p>Processor X executes \(900\) million instructions in \(0.45\) sec. Processor Y executes \(3\) billion instructions in \(2\) sec. Which has the higher throughput?</p>
+<h4>Solution</h4>
+<div class="math">$$\text{Throughput}_X=\frac{900\times10^{6}}{0.45\ \text{sec}}=\frac{9\times10^{8}}{4.5\times10^{-1}}=2\times10^{9}\ \text{instructions/sec}$$</div>
+<div class="math">$$\text{Throughput}_Y=\frac{3\times10^{9}}{2\ \text{sec}}=1.5\times10^{9}\ \text{instructions/sec}$$</div>
+<div class="concl">Conclusion: \(2\times10^{9}\gt1.5\times10^{9}\), so <b>X has the higher throughput</b>, \(\dfrac{2}{1.5}\approx1.33\times\) that of Y.</div>
+</article>
+
+<article class="prob extra" id="e2"><header><span class="badge">Extra Example</span><span class="pn">Performance</span></header>
+<p>A task takes \(4\) sec on Processor P and \(8\) sec on Processor Q. Compare their performance.</p>
+<h4>Solution</h4>
+<div class="math">$$\text{Performance}_P=\frac{1}{4}=0.25\ \text{sec}^{-1}\qquad\text{Performance}_Q=\frac{1}{8}=0.125\ \text{sec}^{-1}$$</div>
+<div class="math">$$\frac{\text{Performance}_P}{\text{Performance}_Q}=\frac{0.25}{0.125}=2$$</div>
+<div class="concl">Conclusion: <b>P is \(2\times\) faster than Q.</b></div>
+</article>
+</section>
+
+<!-- ================= SECTION 7 ================= -->
+<section class="mod" id="s7">
+<header class="mh"><p class="eyebrow">Section 7</p><h2>CPU time and clock rate</h2></header>
+<div class="formula"><p class="box-t">The three-step formula chain</p>
+<div class="math">$$\text{CPU Time}=\text{CPU Clock Cycles}\times\text{Clock Cycle Time}$$</div>
+<div class="math">$$\text{CPU Time}=\frac{\text{CPU Clock Cycles}}{\text{Clock Rate}}$$</div>
+<div class="math">$$\text{CPU Time}=\frac{\text{IC}\times\text{CPI}}{\text{Clock Rate}}$$</div></div>
+<p>How the chain connects: the clock cycle time is the reciprocal of the clock rate, \(\text{Clock Cycle Time}=\dfrac{1}{\text{Clock Rate}}\), which turns line 1 into line 2. The total clock cycles equal \(\text{IC}\times\text{CPI}\), which turns line 2 into line 3.</p>
+<div class="scroll"><table class="t" style="min-width:480px"><thead><tr><th>Term</th><th>Meaning</th><th>Unit</th></tr></thead><tbody>
+<tr><td><b>IC</b></td><td>Instruction Count: how many instructions the program executes.</td><td>instructions</td></tr>
+<tr><td><b>CPI</b></td><td>Cycles Per Instruction: average clock cycles each instruction takes.</td><td>cycles/instruction</td></tr>
+<tr><td><b>Clock rate</b></td><td>Cycles per second.</td><td>Hz &nbsp;(\(1\ \text{MHz}=10^{6}\ \text{Hz}\), \(1\ \text{GHz}=10^{9}\ \text{Hz}\))</td></tr>
+<tr><td><b>Clock cycle time</b></td><td>Duration of one cycle, \(1/\text{Clock Rate}\).</td><td>sec</td></tr>
+</tbody></table></div>
+
+<article class="prob" id="p3"><header><span class="pn">Problem 3</span><span class="tag">From class notes &middot; completed</span></header>
+<p>A processor executes \(800\) million instructions with a CPI of \(2\) and a clock rate of \(2\ \text{GHz}\) (\(2\times10^{9}\ \text{Hz}\)). Find the CPU time.</p>
+<h4>Solution</h4>
+<div class="math">$$\text{CPU Time}=\frac{\text{IC}\times\text{CPI}}{\text{Clock Rate}}$$</div>
+<div class="math">$$\text{CPU Time}=\frac{800\times10^{6}\times2}{2\times10^{9}\ \text{Hz}}=\frac{1.6\times10^{9}}{2\times10^{9}}\ \text{sec}$$</div>
+<div class="concl">\(\text{CPU Time}=\boxed{0.8\ \text{sec}}\)</div>
+</article>
+
+<article class="prob" id="p4"><header><span class="pn">Problem 4</span><span class="tag">From class notes &middot; completed and corrected</span></header>
+<p>A program has \(1200\) instructions. Processor A has \(\text{CPI}=2\) and clock rate \(2\ \text{GHz}\) (\(2\times10^{9}\ \text{Hz}\)). Processor B has \(\text{CPI}=1.5\) and clock rate \(2.5\ \text{MHz}\) (\(2.5\times10^{6}\ \text{Hz}\)). Find the CPU time of each and decide which is better.</p>
+<h4>Solution</h4>
+<div class="math">$$\text{CPU Time}=\frac{\text{IC}\times\text{CPI}}{\text{Clock Rate}}$$</div>
+<div class="math">$$\text{CPU Time}_A=\frac{1200\times2}{2\times10^{9}\ \text{Hz}}=\frac{2400}{2\times10^{9}}=1.2\times10^{-6}\ \text{sec}=1.2\ \mu\text{s}$$</div>
+<div class="math">$$\text{CPU Time}_B=\frac{1200\times1.5}{2.5\times10^{6}\ \text{Hz}}=\frac{1800}{2.5\times10^{6}}=7.2\times10^{-4}\ \text{sec}=720\ \mu\text{s}$$</div>
+<div class="concl">Conclusion: \(1.2\ \mu\text{s}\lt720\ \mu\text{s}\), so <b>Processor A is better</b>. It is \(\dfrac{7.2\times10^{-4}}{1.2\times10^{-6}}=600\times\) faster.</div>
+<div class="box note"><p class="box-t">Correction to the handwritten note</p><p>In the scratch work the values \(1.5\) and \(2.5\) were swapped in B&rsquo;s fraction. The CPI (\(1.5\)) belongs in the numerator with IC, and the clock rate (\(2.5\ \text{MHz}\)) belongs in the denominator. Also watch the unit: B&rsquo;s clock is in <b>MHz</b> (\(10^{6}\)), not GHz.</p></div>
+</article>
+
+<article class="prob extra" id="e3"><header><span class="badge">Extra Example</span><span class="pn">CPU time</span></header>
+<p>A program has \(500\) million instructions, \(\text{CPI}=3\), and runs on a \(1.5\ \text{GHz}\) processor. Find the CPU time and the clock cycle time.</p>
+<h4>Solution</h4>
+<div class="math">$$\text{CPU Time}=\frac{\text{IC}\times\text{CPI}}{\text{Clock Rate}}=\frac{500\times10^{6}\times3}{1.5\times10^{9}}=\frac{1.5\times10^{9}}{1.5\times10^{9}}=\boxed{1\ \text{sec}}$$</div>
+<div class="math">$$\text{Clock Cycle Time}=\frac{1}{\text{Clock Rate}}=\frac{1}{1.5\times10^{9}}\approx0.667\times10^{-9}\ \text{sec}=0.667\ \text{ns}$$</div>
+</article>
+
+<article class="prob extra" id="e4"><header><span class="badge">Extra Example</span><span class="pn">CPU time and CPI, two processors</span></header>
+<p>A program has \(2000\) instructions. Processor X: \(\text{CPI}=1.2\), \(3\ \text{GHz}\). Processor Y: \(\text{CPI}=2\), \(4\ \text{GHz}\). Which is faster, and by what factor?</p>
+<h4>Solution</h4>
+<div class="math">$$\text{CPU Time}_X=\frac{2000\times1.2}{3\times10^{9}}=\frac{2400}{3\times10^{9}}=8\times10^{-7}\ \text{sec}=0.8\ \mu\text{s}$$</div>
+<div class="math">$$\text{CPU Time}_Y=\frac{2000\times2}{4\times10^{9}}=\frac{4000}{4\times10^{9}}=1\times10^{-6}\ \text{sec}=1\ \mu\text{s}$$</div>
+<div class="concl">Conclusion: <b>X is faster</b> even though Y has the higher clock rate. \(\dfrac{1.0}{0.8}=1.25\times\). A higher clock does not guarantee better performance when CPI differs.</div>
+</article>
+</section>
+
+<!-- ================= SECTION 8 ================= -->
+<section class="mod" id="s8">
+<header class="mh"><p class="eyebrow">Section 8</p><h2>Speedup and performance scaling</h2></header>
+<div class="formula"><p class="box-t">Speedup formula</p>
+<div class="math">$$\text{Speedup}=\frac{\text{Old Time}}{\text{New Time}}\quad(\times)$$</div>
+<p>Equivalently \(\text{Speedup}=\dfrac{\text{Performance}_{\text{new}}}{\text{Performance}_{\text{old}}}\). A speedup above \(1\times\) means an improvement.</p></div>
+
+<article class="prob" id="p5"><header><span class="pn">Problem 5</span><span class="tag">From class notes &middot; cleaned up</span></header>
+<p>A processor executes a fixed workload (\(2\) million instructions) at an initial clock rate of \(2000\ \text{Hz}\). The clock rate is now increased to \(4000\ \text{Hz}\). Calculate the speedup.</p>
+<h4>Solution</h4>
+<div class="math">$$\text{CPU Time}_{\text{old}}=\frac{\text{IC}\times\text{CPI}}{2000}\qquad\text{CPU Time}_{\text{new}}=\frac{\text{IC}\times\text{CPI}}{4000}$$</div>
+<div class="math">$$\text{Speedup}=\frac{\text{CPU Time}_{\text{old}}}{\text{CPU Time}_{\text{new}}}=\frac{\dfrac{\text{IC}\times\text{CPI}}{2000}}{\dfrac{\text{IC}\times\text{CPI}}{4000}}=\frac{4000}{2000}$$</div>
+<div class="concl">\(\text{Speedup}=\boxed{2\times}\). The workload and CPI are unchanged, so they cancel. Doubling the clock rate halves the time.</div>
+<p>(Illustration: if \(\text{CPI}=1\), the old time is \(\dfrac{2\times10^{6}}{2000}=1000\ \text{sec}\) and the new time is \(500\ \text{sec}\), and \(\dfrac{1000}{500}=2\).)</p>
+</article>
+
+<article class="prob" id="p6"><header><span class="pn">Problem 6</span><span class="tag">From class notes &middot; completed</span></header>
+<p>Computer A has a clock rate of \(2\ \text{GHz}\) and a CPU time of \(10\) sec. Computer B aims for a CPU time of \(6\) sec, and its total clock cycles are \(20\%\) higher (\(\text{Clock Cycles}_B=1.2\times\text{Clock Cycles}_A\)). Find the clock rate Computer B needs.</p>
+<h4>Solution</h4>
+<p><b>Step 1.</b> Clock cycles of A, using \(\text{CPU Time}=\dfrac{\text{Clock Cycles}}{\text{Clock Rate}}\Rightarrow\text{Clock Cycles}=\text{CPU Time}\times\text{Clock Rate}\):</p>
+<div class="math">$$\text{Clock Cycles}_A=10\ \text{sec}\times2\times10^{9}\ \text{Hz}=20\times10^{9}\ \text{cycles}$$</div>
+<p><b>Step 2.</b> Clock cycles of B (\(20\%\) more):</p>
+<div class="math">$$\text{Clock Cycles}_B=20\times10^{9}+\left(20\times10^{9}\times\frac{20}{100}\right)=20\times10^{9}+4\times10^{9}=24\times10^{9}\ \text{cycles}$$</div>
+<p><b>Step 3.</b> Required clock rate of B:</p>
+<div class="math">$$\text{Clock Rate}_B=\frac{\text{Clock Cycles}_B}{\text{CPU Time}_B}=\frac{24\times10^{9}}{6\ \text{sec}}=4\times10^{9}\ \text{Hz}$$</div>
+<div class="concl">\(\text{Clock Rate}_B=\boxed{4\ \text{GHz}}\), twice the clock rate of A. B does \(20\%\) more work in \(60\%\) of the time, so it needs \(\dfrac{1.2}{0.6}=2\times\) the clock.</div>
+<div class="box note"><p class="box-t">Correction to the handwritten note</p><p>The rough note wrote GHz where the result is a <b>number of cycles</b>. Cycles \(=\) seconds \(\times\) Hz, so the unit of \(20\times10^{9}\) is cycles.</p></div>
+</article>
+
+<article class="prob" id="p7"><header><span class="pn">Problem 7</span><span class="tag">From class notes &middot; completed</span></header>
+<p>A processor&rsquo;s performance is increased by \(50\%\). The original CPU time is \(10\) sec. Find the new CPU time.</p>
+<h4>Solution</h4>
+<div class="math">$$\text{Performance}_{\text{old}}=\frac{1}{10\ \text{sec}}=0.1$$</div>
+<div class="math">$$\text{Performance}_{\text{new}}=\frac{1}{10}+\left(\frac{1}{10}\times\frac{50}{100}\right)=0.1+0.05=0.15$$</div>
+<div class="math">$$\text{CPU Time}_{\text{new}}=\frac{1}{\text{Performance}_{\text{new}}}=\frac{1}{0.15}$$</div>
+<div class="concl">\(\text{CPU Time}_{\text{new}}=\boxed{6.67\ \text{sec}}\). Note that a \(50\%\) performance gain is a speedup of \(1.5\times\), so \(\dfrac{10}{1.5}=6.67\ \text{sec}\), not \(5\) sec.</div>
+</article>
+
+<article class="prob extra" id="e5"><header><span class="badge">Extra Example</span><span class="pn">Clock rate scaling</span></header>
+<p>Computer X has a \(3\ \text{GHz}\) clock and a CPU time of \(12\) sec. Computer Y must finish the same program in \(8\) sec, but its total clock cycles are \(25\%\) higher. Find Y&rsquo;s required clock rate.</p>
+<h4>Solution</h4>
+<div class="math">$$\text{Clock Cycles}_X=12\times3\times10^{9}=36\times10^{9}\ \text{cycles}$$</div>
+<div class="math">$$\text{Clock Cycles}_Y=1.25\times36\times10^{9}=45\times10^{9}\ \text{cycles}$$</div>
+<div class="math">$$\text{Clock Rate}_Y=\frac{45\times10^{9}}{8\ \text{sec}}=5.625\times10^{9}\ \text{Hz}$$</div>
+<div class="concl">\(\text{Clock Rate}_Y=\boxed{5.625\ \text{GHz}}\)</div>
+</article>
+
+<article class="prob extra" id="e6"><header><span class="badge">Extra Example</span><span class="pn">Speedup from a performance gain</span></header>
+<p>A processor&rsquo;s performance rises by \(25\%\). Its original CPU time is \(20\) sec. Find the new CPU time and the speedup.</p>
+<h4>Solution</h4>
+<div class="math">$$\text{Performance}_{\text{old}}=\frac{1}{20}=0.05\qquad\text{Performance}_{\text{new}}=0.05+\left(0.05\times\frac{25}{100}\right)=0.0625$$</div>
+<div class="math">$$\text{CPU Time}_{\text{new}}=\frac{1}{0.0625}=16\ \text{sec}\qquad\text{Speedup}=\frac{20}{16}=1.25\times$$</div>
+<div class="concl">\(\text{CPU Time}_{\text{new}}=\boxed{16\ \text{sec}}\), \(\text{Speedup}=\boxed{1.25\times}\)</div>
+</article>
+</section>
+
+<!-- ================= SECTION 9 ================= -->
+<section class="mod" id="s9">
+<header class="mh"><p class="eyebrow">Section 9</p><h2>Pitfall: Amdahl&rsquo;s law</h2></header>
+<div class="formula"><p class="box-t">Amdahl&rsquo;s law</p>
+<div class="math">$$\text{Overall Speedup}=\frac{1}{(1-P)+\dfrac{P}{S}}$$</div>
+<ul style="margin-bottom:6px"><li>\(P\): the <b>portion</b> (fraction) of the program&rsquo;s execution time that is improved or changed.</li><li>\(S\): the <b>speedup factor</b> of that improved part.</li><li>\(1-P\): the part that is <b>not</b> improved.</li></ul></div>
+<p><b>The pitfall.</b> It is tempting to expect that making one component \(S\) times faster makes the whole system \(S\) times faster. It does not. The unimproved fraction \((1-P)\) still takes the same time, so it limits the total gain. Even an infinitely fast improvement is capped at \(\dfrac{1}{1-P}\).</p>
+<div class="scroll"><table class="t" style="min-width:420px;max-width:560px"><thead><tr><th>Improved fraction \(P\)</th><th>Best possible overall speedup \(\dfrac{1}{1-P}\)</th></tr></thead><tbody>
+<tr><td>\(0.50\)</td><td>\(2\times\)</td></tr><tr><td>\(0.80\)</td><td>\(5\times\)</td></tr><tr><td>\(0.90\)</td><td>\(10\times\)</td></tr><tr><td>\(0.95\)</td><td>\(20\times\)</td></tr></tbody></table></div>
+<p>This is why &ldquo;make the common case fast&rdquo; works: a large \(P\) is what lets an improvement pay off.</p>
+
+<article class="prob" id="p8"><header><span class="pn">Problem 8</span><span class="tag">From class notes &middot; completed</span></header>
+<p>A program spends \(50\%\) of its time on multiplication. A processor upgrade makes multiplication \(5\times\) faster. Find the overall speedup.</p>
+<h4>Solution</h4>
+<p>\(P=0.5\), \(S=5\).</p>
+<div class="math">$$\text{Overall Speedup}=\frac{1}{(1-0.5)+\dfrac{0.5}{5}}=\frac{1}{0.5+0.1}=\frac{1}{0.6}$$</div>
+<div class="concl">\(\text{Overall Speedup}\approx\boxed{1.67\times}\), far below the \(5\times\) the multiplier alone gained.</div>
+<figure class="fig" style="margin:14px 0"><div class="scroll"><svg viewBox="0 0 640 150" style="min-width:560px" role="img" aria-label="Execution time before and after: multiplication share shrinks from half the time to one tenth of the original time">
+<text x="10" y="48" class="t" font-size="13" font-weight="700" dominant-baseline="central" fill="#111827">Before</text>
+<rect x="90" y="30" width="250" height="36" fill="#F3F4F6" stroke="#111827" stroke-width="1.4"/><text x="215" y="48" class="t" font-size="12" font-weight="600" text-anchor="middle" dominant-baseline="central" fill="#111827">other: 0.5</text>
+<rect x="340" y="30" width="250" height="36" fill="#DCF2EF" stroke="#0D9488" stroke-width="1.6"/><text x="465" y="48" class="t" font-size="12" font-weight="600" text-anchor="middle" dominant-baseline="central" fill="#111827">multiplication: 0.5</text>
+<text x="10" y="108" class="t" font-size="13" font-weight="700" dominant-baseline="central" fill="#111827">After</text>
+<rect x="90" y="90" width="250" height="36" fill="#F3F4F6" stroke="#111827" stroke-width="1.4"/><text x="215" y="108" class="t" font-size="12" font-weight="600" text-anchor="middle" dominant-baseline="central" fill="#111827">other: 0.5 (unchanged)</text>
+<rect x="340" y="90" width="50" height="36" fill="#DCF2EF" stroke="#0D9488" stroke-width="1.6"/>
+<text x="402" y="108" class="t" font-size="12" font-weight="600" dominant-baseline="central" fill="#111827">mult: 0.5 &#247; 5 = 0.1 &nbsp;&#8594; total 0.6</text>
+</svg></div><figcaption><b>Figure 9.1.</b> Time before and after (original total = 1). Only the teal part shrinks, so the total falls from 1 to 0.6.</figcaption></figure>
+</article>
+
+<article class="prob" id="p9"><header><span class="pn">Problem 9</span><span class="tag">From class notes &middot; completed</span></header>
+<p>A program takes \(200\) sec to execute. \(60\%\) of the time is CPU calculation and \(40\%\) is memory access. The CPU improves the calculation part to be \(8\times\) faster. Find the overall speedup and the new execution time.</p>
+<h4>Solution</h4>
+<p>\(P=0.6\) (calculation is improved), \(S=8\).</p>
+<div class="math">$$\text{Overall Speedup}=\frac{1}{(1-0.6)+\dfrac{0.6}{8}}=\frac{1}{0.4+0.075}=\frac{1}{0.475}\approx2.105\times\ (\approx2.10\times)$$</div>
+<div class="math">$$\text{Speedup}=\frac{\text{Old Time}}{\text{New Time}}\ \Rightarrow\ \text{New Time}=\frac{\text{Old Time}}{\text{Speedup}}=\frac{200}{2.105}\approx95\ \text{sec}$$</div>
+<div class="concl">\(\text{Overall Speedup}\approx\boxed{2.10\times}\), \(\text{New Time}\approx\boxed{95\ \text{sec}}\)</div>
+<p>Direct check: \(200\times0.4+\dfrac{200\times0.6}{8}=80+15=95\ \text{sec}\). The notes&rsquo; \(95.24\ \text{sec}\) comes from rounding the speedup to \(2.10\) before dividing (\(\dfrac{200}{2.10}=95.24\)). The unrounded value is exactly \(95\ \text{sec}\).</p>
+</article>
+
+<article class="prob" id="p10"><header><span class="pn">Problem 10</span><span class="tag">From class notes &middot; derivation completed</span></header>
+<p>A program spends \(80\%\) of its time in floating-point operations. Suppose the floating-point unit becomes infinitely fast (\(S\to\infty\)). Prove that the maximal overall speedup is \(5\times\).</p>
+<h4>Proof</h4>
+<div class="math">$$\text{Overall Speedup}=\frac{1}{(1-P)+\dfrac{P}{S}}$$</div>
+<div class="math">$$\text{As }S\to\infty,\quad\frac{P}{S}\to0\ \Longrightarrow\ \text{Maximal Overall Speedup}=\frac{1}{1-P}$$</div>
+<div class="math">$$\text{Substituting }P=0.8:\quad\frac{1}{1-0.8}=\frac{1}{0.2}=5\times$$</div>
+<div class="concl">Proved: \(\text{Maximal Overall Speedup}=\boxed{5\times}\). The remaining \(20\%\) of the time (the non-floating-point work) is untouched, so it caps the gain.</div>
+</article>
+
+<article class="prob extra" id="e7"><header><span class="badge">Extra Example</span><span class="pn">Amdahl&rsquo;s law</span></header>
+<p>A program spends \(40\%\) of its runtime in a loop that a new accelerator makes \(10\times\) faster. Find the overall speedup.</p>
+<h4>Solution</h4>
+<div class="math">$$\text{Overall Speedup}=\frac{1}{(1-0.4)+\dfrac{0.4}{10}}=\frac{1}{0.6+0.04}=\frac{1}{0.64}=1.5625$$</div>
+<div class="concl">\(\text{Overall Speedup}\approx\boxed{1.56\times}\). A \(10\times\) faster part gives under \(1.6\times\) overall.</div>
+</article>
+
+<article class="prob extra" id="e8"><header><span class="badge">Extra Example</span><span class="pn">Amdahl&rsquo;s law with execution time and limit</span></header>
+<p>A program takes \(120\) sec. \(75\%\) of its time is in a part that becomes \(3\times\) faster. Find the overall speedup, the new execution time, and the maximum speedup possible if that part were infinitely fast.</p>
+<h4>Solution</h4>
+<div class="math">$$\text{Overall Speedup}=\frac{1}{(1-0.75)+\dfrac{0.75}{3}}=\frac{1}{0.25+0.25}=\frac{1}{0.5}=2\times$$</div>
+<div class="math">$$\text{New Time}=\frac{120}{2}=60\ \text{sec}\qquad\text{Maximum}=\frac{1}{1-0.75}=\frac{1}{0.25}=4\times$$</div>
+<div class="concl">\(\text{Speedup}=\boxed{2\times}\), \(\text{New Time}=\boxed{60\ \text{sec}}\), limit \(=\boxed{4\times}\).</div>
+</article>
+</section>
+
+</div>
+</body></html>

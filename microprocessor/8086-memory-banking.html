@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>8086 Memory Banking Schematic</title>
+<style>
+:root{
+  --bg:#0a0e14; --panel:#0f1620; --line:#1e293b; --text:#d6deeb; --muted:#7a8aa0;
+  --amber:#fbbf24; --cyan:#22d3ee; --emerald:#34d399; --violet:#a78bfa;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono",Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg);
+  background-image:radial-gradient(#17212f 1px,transparent 1px);
+  background-size:22px 22px;
+  color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  min-height:100vh;
+}
+main{max-width:1240px;margin:0 auto;padding:24px 16px 48px}
+h1{margin:0 0 6px;font-size:clamp(20px,3vw,28px);letter-spacing:.3px}
+h1 span{color:var(--cyan)}
+.lead{margin:0 0 18px;color:var(--muted);max-width:860px;line-height:1.5;font-size:14.5px}
+.lead b{color:var(--text);font-family:var(--mono);font-weight:600}
+.panel{background:rgba(15,22,32,.92);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.row-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;gap:12px}
+.row-title .hint{letter-spacing:0;text-transform:none}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}
+.mode{
+  all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:28px 1fr;gap:2px 10px;align-items:center;
+  padding:10px 12px;border:1px solid #243044;border-radius:10px;background:#0c131c;transition:.2s;
+}
+.mode:hover{border-color:#3a4c66}
+.mode:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.mode .num{grid-row:span 2;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:700 13px var(--mono);background:#162130;color:var(--muted)}
+.mode .t{font-size:13.5px;font-weight:600;line-height:1.25}
+.mode code{font:12px var(--mono);color:var(--cyan)}
+.mode[aria-checked="true"]{border-color:var(--cyan);background:#0e1e2c;box-shadow:0 0 0 1px var(--cyan),0 0 20px rgba(34,211,238,.22)}
+.mode[aria-checked="true"] .num{background:var(--cyan);color:#06222a}
+.slotrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:14px}
+.slotrow .lab{font-size:12px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid #243044;border-radius:9px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;padding:6px 12px;font:12px var(--mono);color:var(--muted);background:#0c131c;border-right:1px solid #243044}
+.seg button:last-child{border-right:0}
+.seg button:hover{color:var(--text)}
+.seg button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+.seg button[aria-checked="true"]{background:rgba(251,191,36,.14);color:var(--amber)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.stage{overflow-x:auto;padding:6px}
+#sch{display:block;width:100%;height:auto;min-width:880px}
+#sch text{font-family:var(--mono)}
+.status{margin:0 0 14px;padding:12px 16px;border-left:3px solid var(--cyan);background:rgba(34,211,238,.06);border-radius:0 10px 10px 0;font-size:14px;line-height:1.5}
+.below{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px}
+@media (max-width:900px){.below{grid-template-columns:1fr}}
+.tablewrap{overflow-x:auto}
+table.tt{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+.tt th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);font-weight:600;vertical-align:bottom}
+.tt th small{text-transform:none;letter-spacing:0;color:#5f6f86;font-family:var(--mono)}
+.tt td{padding:9px 8px;border-bottom:1px solid #151f2c;font-family:var(--mono);font-size:12.5px}
+.tt td:last-child{font-family:system-ui,sans-serif;font-size:12.5px;color:#aab6c8}
+.tt tbody tr{cursor:pointer;transition:background .2s}
+.tt tbody tr:hover{background:rgba(255,255,255,.03)}
+.tt tbody tr.active{background:rgba(34,211,238,.1);box-shadow:inset 3px 0 0 var(--cyan)}
+.tt tbody tr:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
+.on-e{color:var(--emerald);font-weight:700}.on-o{color:var(--violet);font-weight:700}.offc{color:#5a6a80}
+.ctl{color:var(--cyan)}
+.callout h2{margin:0 0 8px;font-size:15px}
+.callout p{margin:0 0 10px;font-size:13.5px;line-height:1.55;color:#b5c1d3}
+.callout code{font:12px var(--mono);padding:1px 5px;border-radius:4px;background:#142031}
+.callout .a{color:var(--amber)}.callout .c{color:var(--cyan)}
+.foot{margin-top:6px;font-size:11.5px;color:#5f6f86}
+
+/* ---------- SVG styling ---------- */
+.cpu-r{fill:#0f1824;stroke:#3d516c;stroke-width:2}
+.cpu-t{font-size:20px;font-weight:800;letter-spacing:.14em;fill:#e8eef8}
+.sub{font-size:9.5px;fill:var(--muted)}
+.glbl{font-size:10.5px;font-weight:700}
+.note{font-size:10px;fill:#8d7a3c}
+.grp .wire{fill:none;stroke:var(--c);stroke-width:1.6;stroke-linecap:round;transition:opacity .25s}
+.grp .halo{fill:none;stroke:var(--c);stroke-width:7;stroke-linecap:round;opacity:0;transition:opacity .25s}
+.grp .dot,.grp .nub,.grp .arrow,.grp .lbl{fill:var(--c);transition:opacity .25s}
+.grp .lbl{font-size:8.5px}
+.grp .band{fill:var(--c);fill-opacity:.06;stroke:var(--c);stroke-opacity:.35;stroke-dasharray:3 3;transition:opacity .25s}
+.grp .bub{fill:#0a0e14;stroke:var(--c);stroke-width:1.6}
+.grp .pill-r{fill:#0a0e14;stroke:var(--c);stroke-width:1.2}
+.grp .pill-t{fill:var(--c);font-size:10.5px;font-weight:700}
+.grp.on .halo{opacity:.22}
+.grp.on .wire{stroke-dasharray:6 4;animation:flow .9s linear infinite}
+.grp.data.on .wire{animation:flow 1.2s linear infinite alternate}
+.grp.half .wire,.grp.half .dot{opacity:.5}
+.grp.off .wire,.grp.off .dot,.grp.off .nub,.grp.off .arrow,.grp.off .band{opacity:.17}
+.grp.off .lbl{opacity:.5}
+.grp.off .pill-r{stroke-opacity:.45}
+.grp.off .pill-t{fill-opacity:.65}
+@keyframes flow{to{stroke-dashoffset:-20}}
+@media (prefers-reduced-motion:reduce){.grp.on .wire,.grp.data.on .wire{animation:none}}
+
+.chip .frame{fill:#0c131c;stroke:#243044;stroke-width:1.5;transition:stroke .25s}
+.chip .halo-r{fill:none;stroke:var(--c);stroke-width:9;opacity:0;transition:opacity .25s}
+.chip.on .frame{stroke:var(--c);stroke-width:2}
+.chip.on .halo-r{opacity:.2}
+.chip .content{transition:opacity .25s}
+.chip.off .content{opacity:.52}
+.chip .hd{font-size:11px;font-weight:700;fill:var(--c)}
+.chip .hd.cs{fill:var(--cyan)}
+.chip .hd.ad{fill:var(--amber)}
+.chip .ttl{font-size:15px;font-weight:800;fill:#e8eef8;letter-spacing:.04em}
+.chip .sep{stroke:#1d2938;stroke-width:1}
+.chip .colh{font-size:9.5px;letter-spacing:.08em;fill:#5f6f86}
+.chip .stat{font-size:11px;font-weight:700;fill:#8190a5}
+.chip.on .stat{fill:var(--c)}
+.row rect{fill:#101926;stroke:#1d2938;stroke-width:1;transition:all .25s}
+.row .rs{font-size:13px;font-weight:700;fill:#c3cfdf}
+.row .rb{font-size:10px;fill:#6b7b92}
+.row .ra{font-size:15px;font-weight:700;fill:#d9e2ef}
+.row .rc{font-size:11px;fill:#7d8ca2}
+.row .dd{font-size:12px;fill:#5f6f86}
+.chip.on .row.hit rect{fill:var(--cf);stroke:var(--c);stroke-width:1.8}
+.chip.on .row.hit .rs,.chip.on .row.hit .ra{fill:var(--c)}
+.row.ghost rect{stroke:var(--c);stroke-dasharray:4 3;stroke-opacity:.7}
+
+.iframe{fill:#0c131c;stroke:#243044;stroke-width:1.5}
+.ititle{font-size:10px;letter-spacing:.18em;fill:#5f6f86}
+.ilab{font-size:10px;fill:#6b7b92}
+.ival{font-size:17px;font-weight:800;fill:var(--amber)}
+.iline{font-size:12px;font-weight:700}
+.isep{stroke:#1d2938}
+#info.idle .ival{fill:#5f6f86}
+</style>
+</head>
+<body>
+<main>
+  <h1>Intel 8086 <span>Memory Banking</span></h1>
+  <p class="lead">1 MB of memory is built from two 512 KB byte-wide banks. The 19 lines <b>A19–A1</b> choose a slot in <em>both</em> banks at once; <b>A0</b> and <b>BHE#</b> are active-low chip selects that decide which bank actually answers.</p>
+
+  <section class="panel" aria-label="Bus state selector">
+    <div class="row-title"><span>Bus state</span><span class="hint">click a state, or press 1–4</span></div>
+    <div class="modes" role="radiogroup" aria-label="Bus state">
+      <button class="mode" role="radio" data-mode="1" aria-checked="true"><span class="num">1</span><span class="t">16-bit word<br>at even address</span><code>BHE# = 0 · A0 = 0</code></button>
+      <button class="mode" role="radio" data-mode="2" aria-checked="false"><span class="num">2</span><span class="t">8-bit byte at<br>even address only</span><code>BHE# = 1 · A0 = 0</code></button>
+      <button class="mode" role="radio" data-mode="3" aria-checked="false"><span class="num">3</span><span class="t">8-bit byte at<br>odd address only</span><code>BHE# = 0 · A0 = 1</code></button>
+      <button class="mode" role="radio" data-mode="4" aria-checked="false"><span class="num">4</span><span class="t">Idle<br>no transfer</span><code>BHE# = 1 · A0 = 1</code></button>
+    </div>
+    <div class="slotrow">
+      <span class="lab">Row select on A19–A1:</span>
+      <div class="seg" role="radiogroup" aria-label="Slot select">
+        <button role="radio" data-slot="0" aria-checked="true">Slot 0</button>
+        <button role="radio" data-slot="1" aria-checked="false">Slot 1</button>
+        <button role="radio" data-slot="2" aria-checked="false">Slot 2</button>
+        <button role="radio" data-slot="3" aria-checked="false">Slot 2¹⁹−1</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--amber)"></i>Address A19–A1</span>
+      <span><i style="background:var(--cyan)"></i>Control A0 / BHE# (active-low)</span>
+      <span><i style="background:var(--emerald)"></i>Data D7–D0 (low byte)</span>
+      <span><i style="background:var(--violet)"></i>Data D15–D8 (high byte)</span>
+    </div>
+  </section>
+
+  <p class="status" id="status" aria-live="polite"></p>
+
+  <section class="panel stage">
+    <svg id="sch" viewBox="0 0 1200 790" role="img" aria-labelledby="sch-t sch-d">
+      <title id="sch-t">Intel 8086 memory banking schematic</title>
+      <desc id="sch-d">The 8086 drives 19 shared address lines to an even and an odd 512 KB bank. A0 and BHE# act as active-low chip selects. D7-D0 connects to the even bank and D15-D8 to the odd bank.</desc>
+    </svg>
+  </section>
+
+  <div class="below">
+    <section class="panel">
+      <div class="row-title"><span>Truth table</span><span class="hint">rows are clickable</span></div>
+      <div class="tablewrap">
+        <table class="tt">
+          <thead><tr>
+            <th>#</th><th>BHE#</th><th>A0</th>
+            <th>Even bank<br><small>CS# = A0</small></th>
+            <th>Odd bank<br><small>CS# = BHE#</small></th>
+            <th>Data lanes</th><th>Transfer</th>
+          </tr></thead>
+          <tbody>
+            <tr data-mode="1" tabindex="0"><td>1</td><td class="ctl">0</td><td class="ctl">0</td><td class="on-e">ON</td><td class="on-o">ON</td><td>D15–D0</td><td>16-bit word, even address, 1 cycle</td></tr>
+            <tr data-mode="2" tabindex="0"><td>2</td><td class="ctl">1</td><td class="ctl">0</td><td class="on-e">ON</td><td class="offc">off</td><td>D7–D0</td><td>Byte at even address</td></tr>
+            <tr data-mode="3" tabindex="0"><td>3</td><td class="ctl">0</td><td class="ctl">1</td><td class="offc">off</td><td class="on-o">ON</td><td>D15–D8</td><td>Byte at odd address</td></tr>
+            <tr data-mode="4" tabindex="0"><td>4</td><td class="ctl">1</td><td class="ctl">1</td><td class="offc">off</td><td class="offc">off</td><td>none (Hi-Z)</td><td>Idle, no transfer</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel callout">
+      <h2>Why one address bus can feed both chips</h2>
+      <p>The same 19 wires <span class="a"><code>A19–A1</code></span> reach the address pins of <em>both</em> banks, so slot <code>n</code> is decoded in parallel in each chip. The even bank holds byte <code>2n</code> and the odd bank holds byte <code>2n+1</code>: one row pair per slot.</p>
+      <p><span class="c"><code>A0</code> and <code>BHE#</code></span> are never address bits inside the chips. They act as active-low chip selects (<code>CS#even = A0</code>, <code>CS#odd = BHE#</code>): low enables a bank, high switches it off and releases its data pins.</p>
+      <p>19 bits × 2 banks = 2²⁰ bytes = 1 MB. A word at an odd address is split into two cycles: state 3 for the odd byte, then state 2 for the next even byte.</p>
+    </section>
+  </div>
+  <p class="foot">Simplified view: the address latches (ALE / 8282) and data transceivers (8286) that sit between the CPU and the banks are omitted.</p>
+</main>
+
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('sch');
+const mk=(tag,attrs,parent,text)=>{
+  const e=document.createElementNS(NS,tag);
+  for(const k in attrs)e.setAttribute(k,attrs[k]);
+  if(text!==undefined)e.textContent=text;
+  (parent||svg).appendChild(e);
+  return e;
+};
+const CT=330, J=195;
+const COL={amber:'#fbbf24',cyan:'#22d3ee',emerald:'#34d399',violet:'#a78bfa'};
+
+/* ---------- data ---------- */
+const SLOTS=[
+  {lbl:'Slot 0',     bin:'000…000',ev:'00000H',od:'00001H'},
+  {lbl:'Slot 1',     bin:'000…001',ev:'00002H',od:'00003H'},
+  {lbl:'Slot 2',     bin:'000…010',ev:'00004H',od:'00005H'},
+  {lbl:'Slot 2¹⁹−1', bin:'111…111',ev:'FFFFEH',od:'FFFFFH'}
+];
+const MODES={
+  1:{bhe:0,a0:0,cycle:'16 bits · 1 bus cycle',
+     text:'Both CS# pins are low. A19–A1 selects the same slot in both banks, so the even byte rides D7–D0 and the odd byte rides D15–D8: one 16-bit word in a single bus cycle.'},
+  2:{bhe:1,a0:0,cycle:'8 bits (even byte) · 1 cycle',
+     text:'Only the Even Bank sees CS# = 0. One byte moves on D7–D0. The Odd Bank still sees the address but ignores it, and its data pins stay Hi-Z, so D15–D8 carry nothing.'},
+  3:{bhe:0,a0:1,cycle:'8 bits (odd byte) · 1 cycle',
+     text:'Only the Odd Bank is selected. The byte at the odd address travels on the upper lane D15–D8 while D7–D0 are idle and the Even Bank is deselected.'},
+  4:{bhe:1,a0:1,cycle:'no transfer',
+     text:'Neither CS# is asserted, so both banks ignore the address bus and release their data pins (Hi-Z). No transfer takes place.'}
+};
+
+/* ---------- helpers ---------- */
+const grp=(id,cls,color)=>mk('g',{id,class:'grp '+cls+' on',style:'--c:'+color});
+const wire=(g,d)=>{mk('path',{d,class:'halo'},g);mk('path',{d,class:'wire'},g);};
+const pill=(g,x,y,w)=>{
+  mk('rect',{x:x-w/2,y:y-9,width:w,height:18,rx:9,class:'pill-r'},g);
+  return mk('text',{x,y:y+3.6,'text-anchor':'middle',class:'pill-t'},g,'');
+};
+const pinLabel=(g,x,t)=>mk('text',{transform:'translate('+(x+3)+',130) rotate(-90)',class:'lbl'},g,t);
+const nub=(g,x)=>mk('rect',{x:x-3,y:134,width:6,height:8,class:'nub'},g);
+const st=(g,s)=>{g.classList.remove('on','off','half');g.classList.add(s);};
+
+/* ---------- CPU ---------- */
+const cpu=mk('g',{id:'cpu'});
+mk('rect',{x:40,y:30,width:1120,height:110,rx:8,class:'cpu-r'},cpu);
+mk('text',{x:600,y:60,'text-anchor':'middle',class:'cpu-t'},cpu,'8086 MICROPROCESSOR');
+mk('text',{x:600,y:80,'text-anchor':'middle',class:'sub'},cpu,'16-bit data bus · 20-bit address (1 MB) · A0 and BHE# steer the byte lanes');
+mk('text',{x:126,y:100,'text-anchor':'middle',class:'glbl',fill:COL.emerald},cpu,'D7–D0 (LOW BYTE)');
+mk('text',{x:1074,y:100,'text-anchor':'middle',class:'glbl',fill:COL.violet},cpu,'D15–D8 (HIGH BYTE)');
+mk('text',{x:600,y:100,'text-anchor':'middle',class:'glbl',fill:COL.amber},cpu,'A19–A1 (19 LINES)');
+mk('text',{x:225,y:100,'text-anchor':'middle',class:'glbl',fill:COL.cyan},cpu,'A0');
+mk('text',{x:975,y:100,'text-anchor':'middle',class:'glbl',fill:COL.cyan},cpu,'BHE#');
+mk('text',{x:470,y:168,'text-anchor':'end',class:'note'},svg,'19 individual lines, A19 … A1 ▸');
+mk('text',{x:730,y:168,class:'note'},svg,'◂ every line forks (●) to BOTH banks');
+
+/* ---------- address bus: trunk + two branches ---------- */
+const gT=grp('g-addr-t','addr',COL.amber);
+const gL=grp('g-addr-l','addr',COL.amber);
+const gR=grp('g-addr-r','addr',COL.amber);
+for(let i=0;i<19;i++){
+  const x=483+13*i, lx=262+i*186/18, rx=752+i*186/18;
+  wire(gT,'M'+x+' 140 L'+x+' '+J);
+  mk('circle',{cx:x,cy:J,r:2.8,class:'dot'},gT);
+  nub(gT,x); pinLabel(gT,x,'A'+(19-i));
+  wire(gL,'M'+x+' '+J+' C'+x+' '+(J+48)+' '+lx+' '+(CT-48)+' '+lx+' '+CT);
+  wire(gR,'M'+x+' '+J+' C'+x+' '+(J+48)+' '+rx+' '+(CT-48)+' '+rx+' '+CT);
+  mk('circle',{cx:lx,cy:CT,r:2.4,class:'dot'},gL);
+  mk('circle',{cx:rx,cy:CT,r:2.4,class:'dot'},gR);
+}
+
+/* ---------- data lanes ---------- */
+function dataLane(g,x0,hi,cx){
+  mk('rect',{x:cx-66,y:150,width:132,height:174,rx:6,class:'band'},g);
+  for(let i=0;i<8;i++){
+    const x=x0+16*i;
+    wire(g,'M'+x+' 140 L'+x+' '+CT);
+    mk('circle',{cx:x,cy:CT,r:2.4,class:'dot'},g);
+    nub(g,x); pinLabel(g,x,'D'+(hi-i));
+  }
+  mk('polygon',{points:cx+',152 '+(cx-9)+',168 '+(cx+9)+',168',class:'arrow'},g);
+  mk('polygon',{points:cx+',322 '+(cx-9)+',306 '+(cx+9)+',306',class:'arrow'},g);
+  return pill(g,cx,245,92);
+}
+const gDlo=grp('g-dlo','data',COL.emerald);
+const gDhi=grp('g-dhi','data',COL.violet);
+const pDlo=dataLane(gDlo,70,7,126);
+const pDhi=dataLane(gDhi,1018,15,1074);
+
+/* ---------- control (active-low chip selects) ---------- */
+function ctl(g,x,name){
+  wire(g,'M'+x+' 140 L'+x+' 320');
+  nub(g,x); pinLabel(g,x,name);
+  mk('circle',{cx:x,cy:325,r:5,class:'bub'},g);
+  return pill(g,x,245,name==='A0'?66:82);
+}
+const gA0=grp('g-a0','ctl',COL.cyan);
+const gBHE=grp('g-bhe','ctl',COL.cyan);
+const pA0=ctl(gA0,225,'A0');
+const pBHE=ctl(gBHE,975,'BHE#');
+
+/* ---------- memory chips ---------- */
+const ROWS=[{k:0,y:452,h:58},{k:1,y:510,h:58},{k:2,y:568,h:58},{k:'d',y:626,h:40},{k:3,y:666,h:58}];
+function buildChip(o){
+  const g=mk('g',{id:o.id,class:'chip on',style:'--c:'+o.c+';--cf:'+o.cf});
+  mk('rect',{x:o.x,y:CT,width:420,height:440,rx:8,class:'halo-r'},g);
+  mk('rect',{x:o.x,y:CT,width:420,height:440,rx:8,class:'frame'},g);
+  const c=mk('g',{class:'content'},g);
+  const mid=o.x+210, x0=o.x+16;
+  mk('text',{x:o.dataC,y:354,'text-anchor':'middle',class:'hd'},c,o.dataLbl);
+  mk('text',{x:o.dataC,y:367,'text-anchor':'middle',class:'sub'},c,'⇅ bidirectional');
+  mk('text',{x:o.csX,y:354,'text-anchor':'middle',class:'hd cs'},c,'CS#');
+  mk('text',{x:o.csX,y:367,'text-anchor':'middle',class:'sub'},c,'◂ '+o.csSrc);
+  mk('text',{x:o.addrC,y:354,'text-anchor':'middle',class:'hd ad'},c,'Addr In: A19–A1');
+  mk('text',{x:o.addrC,y:367,'text-anchor':'middle',class:'sub'},c,'19 shared lines');
+  mk('text',{x:mid,y:398,'text-anchor':'middle',class:'ttl'},c,o.title);
+  mk('text',{x:mid,y:415,'text-anchor':'middle',class:'sub'},c,o.sub);
+  mk('line',{x1:x0,x2:x0+388,y1:424,y2:424,class:'sep'},c);
+  mk('text',{x:x0+14,y:441,class:'colh'},c,'SLOT (A19–A1)');
+  mk('text',{x:x0+156,y:441,class:'colh'},c,'SYSTEM ADDR');
+  mk('text',{x:x0+274,y:441,class:'colh'},c,'CONTENT');
+  const rows={};
+  ROWS.forEach(r=>{
+    const rg=mk('g',{class:'row'},c);
+    mk('rect',{x:x0,y:r.y+3,width:388,height:r.h-6,rx:5},rg);
+    if(r.k==='d'){
+      mk('text',{x:x0+194,y:r.y+25,'text-anchor':'middle',class:'dd'},rg,'⋮   (slots 3 … 2¹⁹ − 2)');
+      return;
+    }
+    const s=SLOTS[r.k];
+    mk('text',{x:x0+14,y:r.y+25,class:'rs'},rg,s.lbl);
+    mk('text',{x:x0+14,y:r.y+43,class:'rb'},rg,'('+s.bin+')');
+    mk('text',{x:x0+156,y:r.y+36,class:'ra'},rg,'→ '+(o.even?s.ev:s.od));
+    const rc=mk('text',{x:x0+274,y:r.y+35,class:'rc'},rg,'1 Byte: 0–255');
+    rows[r.k]={g:rg,rc};
+  });
+  const stat=mk('text',{x:mid,y:757,'text-anchor':'middle',class:'stat'},c,'');
+  return {g,rows,stat};
+}
+const chipE=buildChip({id:'chip-even',x:40,c:COL.emerald,cf:'rgba(52,211,153,.14)',even:true,
+  title:'512 KB EVEN BANK',sub:'(Low Byte / LB) · 2¹⁹ slots × 8 bit',
+  dataLbl:'Data: D7–D0',dataC:126,csX:225,csSrc:'A0',addrC:355});
+const chipO=buildChip({id:'chip-odd',x:740,c:COL.violet,cf:'rgba(167,139,250,.16)',even:false,
+  title:'512 KB ODD BANK',sub:'(High Byte / HB) · 2¹⁹ slots × 8 bit',
+  dataLbl:'Data: D15–D8',dataC:1074,csX:975,csSrc:'BHE#',addrC:845});
+
+/* ---------- live info panel ---------- */
+const info=mk('g',{id:'info'});
+mk('rect',{x:490,y:360,width:220,height:294,rx:8,class:'iframe'},info);
+mk('text',{x:600,y:384,'text-anchor':'middle',class:'ititle'},info,'LIVE BUS STATE');
+mk('text',{x:506,y:410,class:'ilab'},info,'A19–A1 → slot select');
+const iVal=mk('text',{x:506,y:433,class:'ival'},info,'');
+const iSlot=mk('text',{x:506,y:452,class:'ilab'},info,'');
+mk('line',{x1:506,x2:694,y1:466,y2:466,class:'isep'},info);
+const iA0=mk('text',{x:506,y:487,class:'iline',fill:COL.cyan},info,'');
+const iBHE=mk('text',{x:506,y:505,class:'iline',fill:COL.cyan},info,'');
+mk('line',{x1:506,x2:694,y1:518,y2:518,class:'isep'},info);
+const iEv=mk('text',{x:506,y:539,class:'iline'},info,'');
+const iOd=mk('text',{x:506,y:557,class:'iline'},info,'');
+mk('line',{x1:506,x2:694,y1:570,y2:570,class:'isep'},info);
+const iEa=mk('text',{x:506,y:591,class:'iline'},info,'');
+const iOa=mk('text',{x:506,y:609,class:'iline'},info,'');
+const iCy=mk('text',{x:506,y:638,class:'ilab',fill:'#c3cfdf'},info,'');
+
+/* ---------- state ---------- */
+let mode=1, slot=0;
+const $$=s=>Array.from(document.querySelectorAll(s));
+const modeBtns=$$('.mode'), slotBtns=$$('.seg button'), trs=$$('.tt tbody tr');
+const statusEl=document.getElementById('status');
+
+function render(){
+  const m=MODES[mode], sl=SLOTS[slot];
+  const evenOn=m.a0===0, oddOn=m.bhe===0, idle=!evenOn&&!oddOn;
+
+  st(gA0,evenOn?'on':'off');   st(gBHE,oddOn?'on':'off');
+  st(gDlo,evenOn?'on':'off');  st(gDhi,oddOn?'on':'off');
+  st(gT,idle?'off':'on');
+  st(gL,idle?'off':(evenOn?'on':'half'));
+  st(gR,idle?'off':(oddOn?'on':'half'));
+  pA0.textContent='A0 = '+m.a0;
+  pBHE.textContent='BHE# = '+m.bhe;
+  pDlo.textContent=evenOn?'D7–D0':'D7–D0 Hi-Z';
+  pDhi.textContent=oddOn?'D15–D8':'D15–D8 Hi-Z';
+
+  [[chipE,evenOn,'D7–D0'],[chipO,oddOn,'D15–D8']].forEach(a=>{
+    const ch=a[0], on=a[1];
+    st(ch.g,on?'on':'off');
+    ch.stat.textContent=on?'CS# = 0 → SELECTED · drives '+a[2]:'CS# = 1 → DESELECTED · data pins Hi-Z';
+    for(const k in ch.rows){
+      const r=ch.rows[k], isSel=(+k===slot);
+      r.g.classList.toggle('hit',on&&isSel);
+      r.g.classList.toggle('ghost',!on&&!idle&&isSel);
+      r.rc.textContent=(!on&&!idle&&isSel)?'decoded, ignored':'1 Byte: 0–255';
+    }
+  });
+
+  info.classList.toggle('idle',idle);
+  iVal.textContent=sl.bin;
+  iSlot.textContent=idle?'(no bank selected, ignored)':sl.lbl+' in '+(evenOn&&oddOn?'both banks':'both chips');
+  iA0.textContent='A0   = '+m.a0+(m.a0===0?'  (asserts even CS#)':'');
+  iBHE.textContent='BHE# = '+m.bhe+(m.bhe===0?'  (asserts odd CS#)':'');
+  const setLine=(t,on,col,txt)=>{t.textContent=txt;t.setAttribute('fill',on?col:'#4f5f75');};
+  setLine(iEv,evenOn,COL.emerald,'EVEN CS# = '+m.a0+(evenOn?' · ON':' · off'));
+  setLine(iOd,oddOn,COL.violet,'ODD  CS# = '+m.bhe+(oddOn?' · ON':' · off'));
+  setLine(iEa,evenOn,COL.emerald,evenOn?sl.ev+' → D7–D0':'—');
+  setLine(iOa,oddOn,COL.violet,oddOn?sl.od+' → D15–D8':'—');
+  iCy.textContent=m.cycle;
+
+  statusEl.textContent=m.text;
+  modeBtns.forEach(b=>b.setAttribute('aria-checked',String(+b.dataset.mode===mode)));
+  slotBtns.forEach(b=>b.setAttribute('aria-checked',String(+b.dataset.slot===slot)));
+  trs.forEach(t=>t.classList.toggle('active',+t.dataset.mode===mode));
+}
+
+modeBtns.forEach(b=>b.addEventListener('click',()=>{mode=+b.dataset.mode;render();}));
+slotBtns.forEach(b=>b.addEventListener('click',()=>{slot=+b.dataset.slot;render();}));
+trs.forEach(t=>{
+  t.addEventListener('click',()=>{mode=+t.dataset.mode;render();});
+  t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();mode=+t.dataset.mode;render();}});
+});
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(e.key>='1'&&e.key<='4'){mode=+e.key;render();}
+});
+render();
+})();
+</script>
+</body>
+</html>
