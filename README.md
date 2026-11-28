@@ -6,6 +6,13 @@ A lightweight, searchable hub for my university study notes, hosted directly on 
 
 ---
 
+## Preview
+![](https://raw.githubusercontent.com/venz-x/notes/refs/heads/main/image.png)
+
+![](https://raw.githubusercontent.com/venz-x/notes/refs/heads/main/image01.png)
+
+![](https://raw.githubusercontent.com/venz-x/notes/refs/heads/main/image02.png)
+
 ## Subjects & Contents
 
 ### Communication
